@@ -13,6 +13,7 @@ class _MicroScreenState extends State<MicroScreen> {
   bool _speechEnabled = false;
   String _statusMessage = '';
   TextEditingController _textController = TextEditingController();
+  String _localeId = 'es_ES'; // Puedes cambiarlo a 'es_MX' si prefieres
 
   @override
   void initState() {
@@ -46,6 +47,11 @@ class _MicroScreenState extends State<MicroScreen> {
         print('onError: $val');
       },
     );
+    
+    // Obtener los idiomas soportados
+    var locales = await _speech.locales();
+    print('Idiomas soportados: $locales');
+
     setState(() {
       _speechEnabled = available;
       if (!available) {
@@ -62,6 +68,10 @@ class _MicroScreenState extends State<MicroScreen> {
         onResult: (val) => setState(() {
           _textController.text = val.recognizedWords;
         }),
+        localeId: _localeId,  // Establecer el idioma
+        listenFor: Duration(seconds: 10),  // Escucha por un máximo de 10 segundos
+        pauseFor: Duration(seconds: 5),    // Pausa el reconocimiento después de 5 segundos de silencio
+        onDevice: true,                    // Forzar el reconocimiento en dispositivo
       );
     } else if (_isListening) {
       setState(() => _isListening = false);
@@ -82,6 +92,7 @@ class _MicroScreenState extends State<MicroScreen> {
       appBar: AppBar(
         title: Text('Reconocimiento de Voz'),
       ),
+      backgroundColor: _isListening ? Colors.green[100] : Colors.red[100],  // Cambia el color de fondo
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -99,7 +110,7 @@ class _MicroScreenState extends State<MicroScreen> {
               children: [
                 FloatingActionButton(
                   onPressed: _speechEnabled ? _listen : null,
-                  backgroundColor: _isListening ? Colors.red : Colors.blue,
+                  backgroundColor: _isListening ? Colors.green : Colors.red,  // Cambia el color del botón
                   child: Icon(_isListening ? Icons.mic : Icons.mic_none),
                 ),
                 ElevatedButton(

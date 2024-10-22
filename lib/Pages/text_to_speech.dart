@@ -11,7 +11,6 @@ class TextToSpeechScreen extends StatefulWidget {
 class _TextToSpeechScreenState extends State<TextToSpeechScreen> {
   late FlutterTts flutterTts;
   String? _newVoiceText;
-  double volume = 0.5;
 
   TtsState ttsState = TtsState.stopped;
 
@@ -46,24 +45,9 @@ class _TextToSpeechScreenState extends State<TextToSpeechScreen> {
   }
 
   Future<void> _speak() async {
-    await flutterTts.setVolume(volume);
-
     if (_newVoiceText != null && _newVoiceText!.isNotEmpty) {
       await flutterTts.speak(_newVoiceText!);
     }
-  }
-
-  Future<void> _stop() async {
-    await flutterTts.stop();
-    setState(() {
-      ttsState = TtsState.stopped;
-    });
-  }
-
-  @override
-  void dispose() {
-    flutterTts.stop();
-    super.dispose();
   }
 
   void _onChange(String text) {
@@ -73,11 +57,18 @@ class _TextToSpeechScreenState extends State<TextToSpeechScreen> {
   }
 
   @override
+  void dispose() {
+    flutterTts.stop();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Text to Speech'),
       ),
+      backgroundColor: Colors.lightBlue[100], // Fondo azul claro
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -88,46 +79,30 @@ class _TextToSpeechScreenState extends State<TextToSpeechScreen> {
               onChanged: _onChange,
               decoration: const InputDecoration(
                 hintText: 'Escribe el texto que deseas escuchar',
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.black, // Color de la línea (borde) a negro
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(
+                    color: Colors.black, // Color del borde al enfocarse
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: _speak,
-                  child: const Text('Hablar'),
-                ),
-                ElevatedButton(
-                  onPressed: isPlaying ? _stop : null,
-                  child: const Text('Detener'),
-                ),
-              ],
+            ElevatedButton(
+              onPressed: _speak,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black, // Color del texto del botón
+                backgroundColor: Colors.white, // Fondo blanco del botón
+              ),
+              child: const Text('Hablar'),
             ),
-            const SizedBox(height: 20),
-            _buildSliders(), // Solo el control de volumen
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSliders() {
-    return Column(
-      children: [
-        Slider(
-          value: volume,
-          onChanged: (newVolume) {
-            setState(() {
-              volume = newVolume;
-            });
-          },
-          min: 0.0,
-          max: 1.0,
-          divisions: 10,
-          label: "Volumen: $volume",
-        ),
-      ],
     );
   }
 }
