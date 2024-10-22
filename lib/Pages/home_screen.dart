@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatelessWidget {
-  // Función para abrir el enlace del repositorio en el navegador
+  final String repoUrl = 'https://github.com/PedroPortillo0/app-movil-herramientas'; // URL del repositorio
+
   void _launchURL() async {
-    const url = 'https://github.com/VeroVelas/funcionalidades.git';  // Cambia este URL por el de tu repositorio
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'No se pudo abrir el enlace $url';
+    final Uri url = Uri.parse(repoUrl); // Usar el URL del repositorio
+    try {
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication); // Abrir en navegador externo
+      } else {
+        throw 'No se pudo abrir el enlace $url';
+      }
+    } catch (e) {
+      print('Error al intentar abrir la URL: $e');
     }
   }
 
@@ -17,7 +22,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Información del Alumno'),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: Colors.blue,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -46,7 +51,7 @@ class HomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Verónica Velasco Jiménez',
+                        'Pedro Portillo Rodriguez',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -54,7 +59,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 10),
                       Text(
-                        'Matrícula: 221224',
+                        'Matrícula: 221217',
                         style: TextStyle(fontSize: 18, color: Colors.grey[700]),
                       ),
                       SizedBox(height: 10),
@@ -72,6 +77,19 @@ class HomeScreen extends StatelessWidget {
                         'Grupo: A',
                         style: TextStyle(fontSize: 18),
                       ),
+                      SizedBox(height: 10),
+                      // Añadir el enlace del repositorio dentro de la información del alumno como texto
+                      GestureDetector(
+                        onTap: _launchURL,
+                        child: Text(
+                          repoUrl,
+                          style: TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline, // Subrayado para indicar que es un enlace
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -87,21 +105,7 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: Icon(Icons.code, color: Colors.redAccent),
-                      title: Text('Ver Repositorio'),
-                      onTap: _launchURL,
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: Icon(Icons.chat, color: Colors.redAccent),
-                      title: Text('Ir al Chatbot'),
-                      onTap: () {
-                        Navigator.pushNamed(context, '/chat');
-                      },
-                    ),
-                    Divider(),
-                    ListTile(
-                      leading: Icon(Icons.gps_fixed, color: Colors.redAccent),
+                      leading: Icon(Icons.gps_fixed, color: Colors.blue),
                       title: Text('Ver Ubicación Actual'),
                       onTap: () {
                         Navigator.pushNamed(context, '/gps');
@@ -109,7 +113,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Divider(),
                     ListTile(
-                      leading: Icon(Icons.qr_code_scanner, color: Colors.redAccent),
+                      leading: Icon(Icons.qr_code_scanner, color: Colors.blue),
                       title: Text('Escanear Código QR'),
                       onTap: () {
                         Navigator.pushNamed(context, '/qr');
@@ -117,7 +121,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Divider(),
                     ListTile(
-                      leading: Icon(Icons.mic, color: Colors.redAccent),
+                      leading: Icon(Icons.mic, color: Colors.blue),
                       title: Text('Grabar con Micrófono'),
                       onTap: () {
                         Navigator.pushNamed(context, '/micro');
@@ -125,7 +129,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Divider(),
                     ListTile(
-                      leading: Icon(Icons.sensors, color: Colors.redAccent),
+                      leading: Icon(Icons.sensors, color: Colors.blue),
                       title: Text('Ver Sensores'),
                       onTap: () {
                         Navigator.pushNamed(context, '/sensores');
@@ -133,7 +137,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     Divider(),
                     ListTile(
-                      leading: Icon(Icons.record_voice_over, color: Colors.redAccent),
+                      leading: Icon(Icons.record_voice_over, color: Colors.blue),
                       title: Text('Text to Speech'),
                       onTap: () {
                         Navigator.pushNamed(context, '/text_to_speech');
