@@ -18,56 +18,85 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Información del Alumno'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Center(
-              child: Image.asset(
-                'assets/images/logo.jpg',  // Asegúrate de que el logo esté en la carpeta assets
-                height: 150,
+      body: SingleChildScrollView( // Agregar el ScrollView para evitar overflow
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Center(
+                child: Image.asset(
+                  'assets/images/logo.jpg',  // Asegúrate de que el logo esté en la carpeta assets
+                  height: 150,
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Carrera: Ingeniería en Software',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Materia: Programación Móvil',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Grupo: A',
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Alumno: Jorge Alexis Arredondo Juárez',  // Aquí puedes colocar tu nombre
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Matrícula: 221187',  // Coloca tu matrícula aquí
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _launchURL,  // Llamada para abrir el repositorio
-              child: Text('Ver Repositorio'),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Navegar a la pantalla del chatbot
-                Navigator.pushNamed(context, '/chat');
-              },
-              child: Text('Ir al Chatbot'),
-            ),
-          ],
+              SizedBox(height: 20),
+              Text(
+                'Carrera: Ingeniería en Software',
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Materia: Programación Móvil',
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Grupo: A',
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Alumno: Jorge Alexis Arredondo Juárez',  // Aquí puedes colocar tu nombre
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Matrícula: 221187',  // Coloca tu matrícula aquí
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _launchURL,  // Llamada para abrir el repositorio
+                child: Text('Ver Repositorio'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/chat');
+                },
+                child: Text('Ir al Chatbot'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/gps');
+                },
+                child: Text('Ver Ubicación Actual'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/qr');
+                },
+                child: Text('Escanear Código QR'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/micro');  // Navegar a la pantalla del micrófono
+                },
+                child: Text('Grabar con Micrófono'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/sensores');  // Navegar a la pantalla de sensores
+                },
+                child: Text('Ver Sensores'),
+              ),
+            ],
+          ),
         ),
       ),
     );

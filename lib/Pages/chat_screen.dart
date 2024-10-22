@@ -7,7 +7,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String apiKey = "AIzaSyCSODG2Bohy9_tSYKXAtrL6s3KEEk-smeI"; // API key de Google Generative AI
+const String apiKey = "AIzaSyCSODG2Bohy9_tSYKXAtrL6s3KEEk-smeI";
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -32,12 +32,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _initializeService();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  // Inicializar los servicios
   Future<void> _initializeService() async {
     _speech = stt.SpeechToText();
     _flutterTts = FlutterTts();
@@ -49,7 +43,6 @@ class _ChatScreenState extends State<ChatScreen> {
     await _loadMessages();
   }
 
-  // Solicitar permisos de micrófono
   Future<void> _requestMicrophonePermission() async {
     var status = await Permission.microphone.status;
     if (!status.isGranted) {
@@ -57,8 +50,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Verificar conexión a Internet con http
-  Future<void> _checkInternetConnection() async {
+  Future<void> _checkInternetConnection() async { //aqui se verifica lo del internet
     try {
       final response = await http.get(Uri.parse('https://google.com'));
       if (response.statusCode == 200) {
@@ -77,7 +69,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Iniciar el reconocimiento de voz
   Future<void> _startListening() async {
     var status = await Permission.microphone.request();
     if (status.isGranted) {
@@ -107,16 +98,13 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Detener el reconocimiento de voz
   void _stopListening() {
     setState(() => _isListening = false);
     _speech.stop();
   }
 
-  // Enviar mensaje al chatbot
   Future<void> _sendMessage() async {
-    await _checkInternetConnection(); // Verificar conexión antes de enviar mensaje
-
+    await _checkInternetConnection();
     if (!_isConnected) {
       setState(() {
         _messages.add(ChatMessage(
@@ -127,7 +115,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (_controller.text.isNotEmpty) {
       setState(() {
-        _messages.add(ChatMessage(text: _controller.text, isUser: true));
+        _messages.add(ChatMessage(text: _controller.text, isUser: true)); //se guardan los mensajes
       });
       String userMessage = _controller.text;
       _controller.clear();
@@ -137,7 +125,6 @@ class _ChatScreenState extends State<ChatScreen> {
       });
 
       try {
-        // Enviar el mensaje a la API de Google Generative AI
         final response = await _chatSession.sendMessage(Content.text(userMessage));
         final botResponse = response.text ?? "No se recibió respuesta";
 
@@ -146,8 +133,8 @@ class _ChatScreenState extends State<ChatScreen> {
           _messages.add(ChatMessage(text: botResponse, isUser: false));
         });
 
-        await _saveMessages(); // Guardar los mensajes
-        await _speak(botResponse); // Respuesta hablada del bot
+        await _saveMessages();
+        await _speak(botResponse);
       } catch (e) {
         setState(() {
           _messages.removeLast();
@@ -157,31 +144,27 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // Respuesta en voz
   Future<void> _speak(String text) async {
     await _flutterTts.setLanguage(_selectedLanguage);
     await _flutterTts.speak(text);
   }
 
-  // Cambiar idioma
   void _changeLanguage(String languageCode) {
     setState(() {
       _selectedLanguage = languageCode;
     });
   }
 
-  // Guardar los últimos mensajes
-  Future<void> _saveMessages() async {
+  Future<void> _saveMessages() async { //aqui se guardan los datos
     final prefs = await SharedPreferences.getInstance();
     List<String> messagesToSave = _messages
-        .take(20)
+        .take(40)
         .map((msg) => "${msg.isUser ? 'user:' : 'bot:'}${msg.text}")
         .toList();
     await prefs.setStringList('chatMessages', messagesToSave);
   }
 
-  // Cargar mensajes guardados
-  Future<void> _loadMessages() async {
+  Future<void> _loadMessages() async { //aqui se restauran los datos
     final prefs = await SharedPreferences.getInstance();
     List<String>? savedMessages = prefs.getStringList('chatMessages');
 
@@ -201,7 +184,8 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chatbot'),
+        title: Text('Chatbot AI', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.indigoAccent,
       ),
       body: Column(
         children: <Widget>[
@@ -209,21 +193,34 @@ class _ChatScreenState extends State<ChatScreen> {
             child: ListView.builder(
               itemCount: _messages.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  title: Align(
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  child: Align(
                     alignment: _messages[index].isUser
                         ? Alignment.centerRight
                         : Alignment.centerLeft,
                     child: Container(
-                      padding: EdgeInsets.all(10),
+                      padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: _messages[index].isUser ? Colors.blue : Colors.grey[300],
-                        borderRadius: BorderRadius.circular(10),
+                        color: _messages[index].isUser
+                            ? Colors.indigoAccent
+                            : Colors.grey[300],
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                          bottomLeft: _messages[index].isUser
+                              ? Radius.circular(16)
+                              : Radius.circular(0),
+                          bottomRight: _messages[index].isUser
+                              ? Radius.circular(0)
+                              : Radius.circular(16),
+                        ),
                       ),
                       child: Text(
                         _messages[index].text,
                         style: TextStyle(
-                          color: _messages[index].isUser ? Colors.white : Colors.black,
+                          color: _messages[index].isUser ? Colors.white : Colors.black87,
+                          fontSize: 16,
                         ),
                       ),
                     ),
@@ -237,34 +234,54 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Row(
               children: <Widget>[
                 IconButton(
-                  icon: Icon(_isListening ? Icons.mic_off : Icons.mic),
+                  icon: Icon(_isListening ? Icons.mic_off : Icons.mic, color: Colors.indigoAccent),
                   onPressed: _isListening ? _stopListening : _startListening,
                 ),
                 Expanded(
                   child: TextField(
                     controller: _controller,
-                    decoration: InputDecoration(hintText: 'Escribe un mensaje'),
+                    decoration: InputDecoration(
+                      hintText: 'Escribe un mensaje...',
+                      filled: true,
+                      fillColor: Colors.grey[200],
+                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: Icon(Icons.send, color: Colors.indigoAccent),
                   onPressed: _sendMessage,
                 ),
               ],
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () => _changeLanguage("en-US"),
-                child: Text("Inglés (EE.UU.)"),
-              ),
-              ElevatedButton(
-                onPressed: () => _changeLanguage("es-MX"),
-                child: Text("Español (México)"),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () => _changeLanguage("en-US"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigoAccent,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text("Inglés (EE.UU.)"),
+                ),
+                ElevatedButton(
+                  onPressed: () => _changeLanguage("es-MX"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.indigoAccent,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text("Español (México)"),
+                ),
+              ],
+            ),
           ),
         ],
       ),
