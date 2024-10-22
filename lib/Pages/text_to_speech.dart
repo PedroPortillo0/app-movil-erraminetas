@@ -96,7 +96,7 @@ class _TextToSpeechScreenState extends State<TextToSpeechScreen> {
               onPressed: _speak,
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black, // Color del texto del botón
-                backgroundColor: Colors.white, // Fondo blanco del botón
+                backgroundColor: Colors.white, 
               ),
               child: const Text('Hablar'),
             ),
