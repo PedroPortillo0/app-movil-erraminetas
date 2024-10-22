@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 class HomeScreen extends StatelessWidget {
   // Función para abrir el enlace del repositorio en el navegador
   void _launchURL() async {
-    const url = 'https://github.com/AlexisJuarez2227/Chat_Bot.git';  // Cambia este URL por el de tu repositorio
+    const url = 'https://github.com/VeroVelas/funcionalidades.git';  // Cambia este URL por el de tu repositorio
     if (await canLaunch(url)) {
       await launch(url);
     } else {
@@ -17,83 +17,130 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Información del Alumno'),
+        backgroundColor: Colors.redAccent,
       ),
-      body: SingleChildScrollView( // Agregar el ScrollView para evitar overflow
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
+              // Logo en el centro
               Center(
-                child: Image.asset(
-                  'assets/images/logo.jpg',  // Asegúrate de que el logo esté en la carpeta assets
-                  height: 150,
+                child: CircleAvatar(
+                  backgroundImage: AssetImage('assets/images/logo.jpg'),
+                  radius: 80,  // Tamaño del logo
                 ),
               ),
               SizedBox(height: 20),
-              Text(
-                'Carrera: Ingeniería en Software',
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Materia: Programación Móvil',
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Grupo: A',
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Alumno: Jorge Alexis Arredondo Juárez',  // Aquí puedes colocar tu nombre
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 10),
-              Text(
-                'Matrícula: 221187',  // Coloca tu matrícula aquí
-                style: TextStyle(fontSize: 18),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _launchURL,  // Llamada para abrir el repositorio
-                child: Text('Ver Repositorio'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/chat');
-                },
-                child: Text('Ir al Chatbot'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/gps');
-                },
-                child: Text('Ver Ubicación Actual'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/qr');
-                },
-                child: Text('Escanear Código QR'),
+
+              // Información del alumno
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Verónica Velasco Jiménez',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Matrícula: 221224',
+                        style: TextStyle(fontSize: 18, color: Colors.grey[700]),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Carrera: Ingeniería en Software',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Materia: Programación Móvil',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Grupo: A',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
               ),
               SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/micro');  // Navegar a la pantalla del micrófono
-                },
-                child: Text('Grabar con Micrófono'),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/sensores');  // Navegar a la pantalla de sensores
-                },
-                child: Text('Ver Sensores'),
+
+              // Lista de opciones con botones estilizados
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.code, color: Colors.redAccent),
+                      title: Text('Ver Repositorio'),
+                      onTap: _launchURL,
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.chat, color: Colors.redAccent),
+                      title: Text('Ir al Chatbot'),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/chat');
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.gps_fixed, color: Colors.redAccent),
+                      title: Text('Ver Ubicación Actual'),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/gps');
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.qr_code_scanner, color: Colors.redAccent),
+                      title: Text('Escanear Código QR'),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/qr');
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.mic, color: Colors.redAccent),
+                      title: Text('Grabar con Micrófono'),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/micro');
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.sensors, color: Colors.redAccent),
+                      title: Text('Ver Sensores'),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/sensores');
+                      },
+                    ),
+                    Divider(),
+                    ListTile(
+                      leading: Icon(Icons.record_voice_over, color: Colors.redAccent),
+                      title: Text('Text to Speech'),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/text_to_speech');
+                      },
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

@@ -1,122 +1,104 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart'; // Importa url_launcher para abrir enlaces
 
 class GpsScreen extends StatefulWidget {
   @override
-  _GpsScreenState createState() => _GpsScreenState();
+  _GPSLocationScreenState createState() => _GPSLocationScreenState();
 }
 
-class _GpsScreenState extends State<GpsScreen> {
-  String? _locationMessage = '';
-  bool _isLoading = false;
+class _GPSLocationScreenState extends State<GpsScreen> {
+  String locationMessage = "Ubicación no disponible";
+  String googleMapsUrl = ""; // Almacena el enlace de Google Maps
 
+  // Método para obtener la ubicación actual
   Future<void> _getCurrentLocation() async {
-    setState(() {
-      _isLoading = true;
-    });
+    bool serviceEnabled;
+    LocationPermission permission;
 
-    try {
-      // Solicita permisos para acceder a la ubicación
-      bool serviceEnabled;
-      LocationPermission permission;
+    // Verificar si los servicios de localización están habilitados
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      setState(() {
+        locationMessage = "Los servicios de localización están deshabilitados.";
+      });
+      return;
+    }
 
-      // Verifica si los servicios de ubicación están habilitados
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        setState(() {
-          _locationMessage = 'Los servicios de ubicación están desactivados.';
-          _isLoading = false;
-        });
-        return;
-      }
-
-      // Solicita permisos de ubicación
-      permission = await Geolocator.checkPermission();
+    // Verificar si los permisos están concedidos
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          setState(() {
-            _locationMessage = 'Los permisos de ubicación han sido denegados';
-            _isLoading = false;
-          });
-          return;
-        }
-      }
-
-      if (permission == LocationPermission.deniedForever) {
         setState(() {
-          _locationMessage =
-              'Los permisos de ubicación han sido denegados permanentemente';
-          _isLoading = false;
+          locationMessage = "Permiso de ubicación denegado.";
         });
         return;
       }
+    }
 
-      // Obtiene la ubicación actual con precisión media
-      Position position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 10)); // Límite de tiempo de 10 segundos
-
+    if (permission == LocationPermission.deniedForever) {
       setState(() {
-        _locationMessage =
-            "Latitud: ${position.latitude}, Longitud: ${position.longitude}";
-        _isLoading = false;
+        locationMessage = "Los permisos de ubicación están permanentemente denegados.";
       });
+      return;
+    }
 
-      // Genera un enlace para Google Maps
-      final googleMapsUrl =
-          "https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}";
-      _openLink(googleMapsUrl); // Llama a la función para abrir el enlace
+    // Obtener la ubicación actual
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
-    } catch (e) {
+    // Crear el enlace de Google Maps basado en las coordenadas
+    googleMapsUrl =
+        "https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}";
+
+    setState(() {
+      locationMessage =
+          "Latitud: ${position.latitude}, Longitud: ${position.longitude}";
+    });
+  }
+
+  // Método para abrir Google Maps con las coordenadas actuales
+  Future<void> _launchGoogleMaps() async {
+    if (googleMapsUrl.isNotEmpty && await canLaunch(googleMapsUrl)) {
+      await launch(googleMapsUrl);
+    } else {
       setState(() {
-        _locationMessage = 'Error obteniendo la ubicación: $e';
-        _isLoading = false;
+        locationMessage = "No se pudo abrir Google Maps.";
       });
     }
   }
-
-  // Función para abrir la URL
-  void _openLink(String url) async {
-    final uri = Uri.parse(url);
-    try {
-      if (!await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      )) {
-        throw 'No se pudo abrir el enlace $url';
-      }
-    } catch (e) {
-      print('No se pudo abrir el enlace: $e');
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ubicación GPS'),
+        title: Text('Obtener Ubicación GPS'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _isLoading
-                ? CircularProgressIndicator() // Indicador de carga mientras se obtiene la ubicación
-                : Text(
-                    _locationMessage ?? '',
-                    textAlign: TextAlign.center,
-                  ),
+          children: <Widget>[
+            Text(locationMessage),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _getCurrentLocation,
-              child: Text('Obtener Ubicación Actual'),
+              child: Text("Obtener Ubicación Actual"),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _launchGoogleMaps,
+              child: Text("Abrir en Google Maps"),
             ),
           ],
         ),
       ),
     );
   }
+}
+
+void main() {
+  runApp(MaterialApp(
+    home: GpsScreen(),
+  ));
 }
