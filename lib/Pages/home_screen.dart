@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatelessWidget {
-  final String repoUrl = 'https://github.com/PedroPortillo0/app-movil-herramientas'; // URL del repositorio
+  final String repoUrl = 'https://github.com/PedroPortillo0/app-movil-erraminetas'; // URL del repositorio
 
   void _launchURL() async {
     final Uri url = Uri.parse(repoUrl); // Usar el URL del repositorio
-    try {
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url, mode: LaunchMode.externalApplication); // Abrir en navegador externo
-      } else {
-        throw 'No se pudo abrir el enlace $url';
-      }
-    } catch (e) {
-      print('Error al intentar abrir la URL: $e');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'No se pudo abrir el enlace $url';
     }
   }
 

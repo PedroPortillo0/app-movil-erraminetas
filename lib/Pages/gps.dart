@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class GpsScreen extends StatefulWidget {
   @override
@@ -8,6 +9,7 @@ class GpsScreen extends StatefulWidget {
 
 class _GPSLocationScreenState extends State<GpsScreen> {
   String locationMessage = "Ubicación no disponible";
+  Position? currentPosition;
 
   // Método para obtener la ubicación actual
   Future<void> _getCurrentLocation() async {
@@ -47,9 +49,26 @@ class _GPSLocationScreenState extends State<GpsScreen> {
         desiredAccuracy: LocationAccuracy.high);
 
     setState(() {
+      currentPosition = position;
       locationMessage =
           "Latitud: ${position.latitude}, Longitud: ${position.longitude}";
     });
+  }
+
+  // Método para abrir Google Maps con las coordenadas actuales en el navegador
+  Future<void> _openGoogleMaps() async {
+    if (currentPosition != null) {
+      String googleMapsUrl =
+          "https://www.google.com/maps/search/?api=1&query=${currentPosition!.latitude},${currentPosition!.longitude}";
+      final Uri url = Uri.parse(googleMapsUrl);
+
+      // Intentar abrir directamente la URL sin canLaunchUrl
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      setState(() {
+        locationMessage = "Ubicación no disponible. Obtén la ubicación primero.";
+      });
+    }
   }
 
   @override
@@ -72,6 +91,14 @@ class _GPSLocationScreenState extends State<GpsScreen> {
                 foregroundColor: Colors.white, backgroundColor: Colors.black, // Color del texto del botón
               ),
               child: Text("Obtener Ubicación Actual"),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _openGoogleMaps,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Colors.blue, // Color del botón
+              ),
+              child: Text("Abrir en Google Maps"),
             ),
           ],
         ),

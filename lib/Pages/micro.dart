@@ -10,16 +10,19 @@ class MicroScreen extends StatefulWidget {
 class _MicroScreenState extends State<MicroScreen> {
   late stt.SpeechToText _speech;
   bool _isListening = false;
-  bool _speechEnabled = false;
-  String _statusMessage = '';
-  TextEditingController _textController = TextEditingController();
-  String _localeId = 'es_ES'; // Puedes cambiarlo a 'es_MX' si prefieres
+  String _speechText = '';
+  String _selectedLanguage = "es-MX";
 
   @override
   void initState() {
     super.initState();
-    _requestMicrophonePermission(); // Pedir permiso para el micrófono
-    _initSpeech();
+    _initializeSpeech();
+  }
+
+  // Inicializar la función de Speech-to-Text
+  Future<void> _initializeSpeech() async {
+    _speech = stt.SpeechToText();
+    await _requestMicrophonePermission();
   }
 
   // Pedir permisos de micrófono
@@ -30,99 +33,114 @@ class _MicroScreenState extends State<MicroScreen> {
     }
   }
 
-  // Inicializar el reconocimiento de voz
-  void _initSpeech() async {
-    _speech = stt.SpeechToText();
-    bool available = await _speech.initialize(
-      onStatus: (val) {
-        setState(() {
-          _statusMessage = 'Estado: $val';
-        });
-        print('onStatus: $val');
-      },
-      onError: (val) {
-        setState(() {
-          _statusMessage = 'Error: $val';
-        });
-        print('onError: $val');
-      },
-    );
-    
-    // Obtener los idiomas soportados
-    var locales = await _speech.locales();
-    print('Idiomas soportados: $locales');
-
-    setState(() {
-      _speechEnabled = available;
-      if (!available) {
-        _statusMessage = 'Reconocimiento de voz no disponible';
-      }
-    });
-  }
-
-  // Función para iniciar o detener el reconocimiento de voz
-  void _listen() async {
-    if (_speechEnabled && !_isListening) {
-      setState(() => _isListening = true);
-      _speech.listen(
-        onResult: (val) => setState(() {
-          _textController.text = val.recognizedWords;
-        }),
-        localeId: _localeId,  // Establecer el idioma
-        listenFor: Duration(seconds: 10),  // Escucha por un máximo de 10 segundos
-        pauseFor: Duration(seconds: 5),    // Pausa el reconocimiento después de 5 segundos de silencio
-        onDevice: true,                    // Forzar el reconocimiento en dispositivo
+  // Iniciar la grabación de voz
+  Future<void> _startListening() async {
+    var status = await Permission.microphone.request();
+    if (status.isGranted) {
+      bool available = await _speech.initialize(
+        onStatus: (val) {
+          if (val == 'done') {
+            _stopListening();
+          }
+        },
+        onError: (val) => print('Error: $val'),
       );
-    } else if (_isListening) {
-      setState(() => _isListening = false);
-      _speech.stop();
+
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _speechText = val.recognizedWords;
+            });
+          },
+          localeId: _selectedLanguage,
+        );
+      }
+    } else {
+      print("Permisos de micrófono denegados");
     }
   }
 
-  // Limpiar el campo de texto
-  void _clearText() {
+  // Detener la grabación de voz
+  void _stopListening() {
+    setState(() => _isListening = false);
+    _speech.stop();
+  }
+
+  // Cambiar el idioma para la voz
+  void _changeLanguage(String languageCode) {
     setState(() {
-      _textController.clear();
+      _selectedLanguage = languageCode;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.lightBlue[100], // Fondo azul claro
       appBar: AppBar(
-        title: Text('Reconocimiento de Voz'),
+        title: Text('Grabar Texto'),
+        backgroundColor: Colors.indigoAccent,
+        elevation: 0, // Sin sombra
       ),
-      backgroundColor: _isListening ? Colors.green[100] : Colors.red[100],  // Cambia el color de fondo
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _textController,
-              decoration: InputDecoration(
-                hintText: 'Texto reconocido',
-                border: OutlineInputBorder(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                _speechText.isEmpty
+                    ? 'Presiona el micrófono para empezar a grabar...'
+                    : _speechText,
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey[800],
+                  fontWeight: FontWeight.w400,
+                ),
               ),
             ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                FloatingActionButton(
-                  onPressed: _speechEnabled ? _listen : null,
-                  backgroundColor: _isListening ? Colors.green : Colors.red,  // Cambia el color del botón
-                  child: Icon(_isListening ? Icons.mic : Icons.mic_none),
-                ),
-                ElevatedButton(
-                  onPressed: _clearText,
-                  child: Text('Limpiar'),
-                ),
-              ],
+          ),
+          SizedBox(height: 30),
+          FloatingActionButton(
+            onPressed: _isListening ? _stopListening : _startListening,
+            backgroundColor: _isListening ? Colors.redAccent : Colors.indigoAccent,
+            child: Icon(
+              _isListening ? Icons.mic_off : Icons.mic,
+              size: 32.0,
             ),
-            SizedBox(height: 20),
-            Text(_statusMessage),
-          ],
-        ),
+          ),
+          SizedBox(height: 30),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: DropdownButton<String>(
+              value: _selectedLanguage,
+              onChanged: (String? newValue) {
+                _changeLanguage(newValue!);
+              },
+              items: <String>['en-US', 'es-MX', 'fr-FR']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text('Idioma: $value'),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
